@@ -131,9 +131,21 @@ variable "ip_range_pods" {
   description = "The _name_ of the secondary subnet ip range to use for pods"
 }
 
+variable "additional_ip_range_pods" {
+  type        = list(string)
+  description = "List of _names_ of the additional secondary subnet ip ranges to use for pods"
+  default     = []
+}
+
 variable "ip_range_services" {
   type        = string
   description = "The _name_ of the secondary subnet range to use for services"
+}
+
+variable "stack_type" {
+  type        = string
+  description = "The stack type to use for this cluster. Either `IPV4` or `IPV4_IPV6`. Defaults to `IPV4`."
+  default     = "IPV4"
 }
 
 
@@ -162,10 +174,11 @@ variable "enable_resource_consumption_export" {
 
 
 variable "network_tags" {
-  description = "(Optional, Beta) - List of network tags applied to auto-provisioned node pools."
+  description = "(Optional) - List of network tags applied to auto-provisioned node pools."
   type        = list(string)
   default     = []
 }
+
 variable "stub_domains" {
   type        = map(list(string))
   description = "Map of stub domains and their resolvers to forward DNS queries for a certain domain to an external DNS server"
@@ -271,8 +284,8 @@ variable "enable_private_nodes" {
 
 variable "master_ipv4_cidr_block" {
   type        = string
-  description = "(Beta) The IP range in CIDR notation to use for the hosted master network"
-  default     = "10.0.0.0/28"
+  description = "(Beta) The IP range in CIDR notation to use for the hosted master network. Optional for Autopilot clusters."
+  default     = null
 }
 
 variable "master_global_access_enabled" {
@@ -298,6 +311,7 @@ variable "identity_namespace" {
   type        = string
   default     = "enabled"
 }
+
 
 variable "release_channel" {
   type        = string
@@ -366,6 +380,7 @@ variable "enable_confidential_nodes" {
   description = "An optional flag to enable confidential node config."
   default     = false
 }
+
 variable "workload_vulnerability_mode" {
   description = "(beta) Vulnerability mode."
   type        = string
@@ -373,9 +388,27 @@ variable "workload_vulnerability_mode" {
 }
 
 variable "workload_config_audit_mode" {
-  description = "(beta) Worload config audit mode."
+  description = "(beta) Workload config audit mode."
   type        = string
   default     = "DISABLED"
+}
+
+variable "enable_fqdn_network_policy" {
+  type        = bool
+  description = "Enable FQDN Network Policies on the cluster"
+  default     = null
+}
+
+variable "security_posture_mode" {
+  description = "Security posture mode.  Accepted values are `DISABLED` and `BASIC`. Defaults to `DISABLED`."
+  type        = string
+  default     = "DISABLED"
+}
+
+variable "security_posture_vulnerability_mode" {
+  description = "Security posture vulnerability mode.  Accepted values are `VULNERABILITY_DISABLED` and `VULNERABILITY_BASIC`. Defaults to `VULNERABILITY_DISABLED`."
+  type        = string
+  default     = "VULNERABILITY_DISABLED"
 }
 
 variable "disable_default_snat" {
@@ -390,11 +423,18 @@ variable "notification_config_topic" {
   default     = ""
 }
 
+variable "deletion_protection" {
+  type        = bool
+  description = "Whether or not to allow Terraform to destroy the cluster."
+  default     = true
+}
+
 variable "enable_tpu" {
   type        = bool
   description = "Enable Cloud TPU resources in the cluster. WARNING: changing this after cluster creation is destructive!"
   default     = false
 }
+
 variable "database_encryption" {
   description = "Application-layer Secrets Encryption settings. The object format is {state = string, key_name = string}. Valid values of state are: \"ENCRYPTED\"; \"DECRYPTED\". key_name is the name of a CloudKMS key."
   type        = list(object({ state = string, key_name = string }))
@@ -416,3 +456,20 @@ variable "timeouts" {
   }
 }
 
+variable "allow_net_admin" {
+  description = "(Optional) Enable NET_ADMIN for the cluster."
+  type        = bool
+  default     = null
+}
+
+variable "fleet_project" {
+  description = "(Optional) Register the cluster with the fleet in this project."
+  type        = string
+  default     = null
+}
+
+variable "fleet_project_grant_service_agent" {
+  description = "(Optional) Grant the fleet project service identity the `roles/gkehub.serviceAgent` and `roles/gkehub.crossProjectServiceAgent` roles."
+  type        = bool
+  default     = false
+}
